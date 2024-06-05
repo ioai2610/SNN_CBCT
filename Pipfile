@@ -7,10 +7,11 @@ name = "pypi"
 torch = "*"
 torchvision = "*"
 torchaudio = "*"
-numpy = "*"
 matplotlib = "*"
 pydicom = "*"
 pandas = "*"
+scikit-learn = "*"
+numpy = "==1.24.3"
 
 [dev-packages]
 

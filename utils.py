@@ -3,6 +3,41 @@ import numpy as np
 import torch
 from mpl_toolkits.axes_grid1 import ImageGrid
 
+
+def plot_loss_and_metrics(train_loss, test_loss, mae, mse, rmse, epochs): # r2,
+    epochs_range = range(1, epochs + 1)
+    plt.figure(figsize=(14, 7))
+
+    plt.subplot(2, 3, 1)
+    plt.plot(epochs_range, train_loss, label='Train Loss')
+    plt.plot(epochs_range, test_loss, label='Test Loss')
+    plt.legend(loc='upper right')
+    plt.title('Loss')
+
+    plt.subplot(2, 3, 2)
+    plt.plot(epochs_range, mae, label='MAE')
+    plt.legend(loc='upper right')
+    plt.title('Mean Absolute Error')
+
+    plt.subplot(2, 3, 3)
+    plt.plot(epochs_range, mse, label='MSE')
+    plt.legend(loc='upper right')
+    plt.title('Mean Squared Error')
+
+    plt.subplot(2, 3, 4)
+    plt.plot(epochs_range, rmse, label='RMSE')
+    plt.legend(loc='upper right')
+    plt.title('Root Mean Squared Error')
+
+    # plt.subplot(2, 3, 5)
+    # plt.plot(epochs_range, r2, label='R^2')
+    # plt.legend(loc='upper right')
+    # plt.title('R^2 Score')
+
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_loss_and_accuracy_in_one(train_losses, accuracies, epochs): #(train_losses, test_losses, accuracies, epochs)
 
     epochs = np.arange(1,epochs+1)
