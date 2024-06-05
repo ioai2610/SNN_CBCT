@@ -5,18 +5,14 @@ import numpy as np
 from utils import imshow
 import matplotlib.pyplot as plt
 import torchvision
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+#################################
+# DEFINICIÓN DE LA RED
+#################################
 
 class SiameseNetwork(nn.Module):
-    """
-        Siamese network for image similarity estimation.
-        The network is composed of two identical networks, one for each input.
-        The output of each network is concatenated and passed to a linear layer. 
-        The output of the linear layer passed through a sigmoid function.
-        `"FaceNet" <https://arxiv.org/pdf/1503.03832.pdf>`_ is a variant of the Siamese network.
-        This implementation varies from FaceNet as we use the `ResNet-18` model from
-        `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_ as our feature extractor.
-        In addition, we aren't using `TripletLoss` as the MNIST dataset is simple, so `BCELoss` can do the trick.
-    """
+    
     def __init__(self):
         super(SiameseNetwork, self).__init__()
         # get resnet model
@@ -37,8 +33,6 @@ class SiameseNetwork(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(256, 1),
         )
-
-        self.sigmoid = nn.Sigmoid()
 
         # initialize the weights
         self.resnet.apply(self.init_weights)
@@ -64,18 +58,19 @@ class SiameseNetwork(nn.Module):
 
         # pass the concatenation to the linear layers
         output = self.fc(output)
-
-        # pass the out of the linear layers to sigmoid layer
-        output = self.sigmoid(output)
         
         return output
     
+
+#################################
+# PARA CARPETA DE TRAIN
+#################################
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
 
     # pérdida
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.MSELoss()
 
     # para graficar pérdida
     loss_train_list = []
@@ -94,50 +89,91 @@ def train(args, model, device, train_loader, optimizer, epoch):
             loss_train_list.append(loss.item())
             if args.dry_run:
                 break
+
+    # Calcular la pérdida promedio para la epoch
     loss_train_list  = np.mean(loss_train_list)
     
 
     return loss_train_list
 
-    
+#################################
+# PARA CARPETA DE TEST
+#################################
+
+# def test(model, device, test_loader):
+#     model.eval()
+#     test_loss = 0
+
+
+#     criterion = nn.MSELoss()
+#     # para graficar perdia en entrenamiento y accuracy
+#     loss_test_list = []
+
+#     with torch.no_grad():
+#         for (images_1, images_2, targets) in test_loader:
+#             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
+#             outputs = model(images_1, images_2).squeeze()
+#             test_loss += criterion(outputs, targets).sum().item()  # sum up batch loss
+ 
+
+#     test_loss /= len(test_loader.dataset)
+
+#     loss_test_list.append(test_loss)
+
+#     print('\nTest set: Average loss: {:.4f}\n'.format(test_loss))
+
+#     loss_test_list = np.mean(loss_test_list)
+
+#     return loss_test_list, []
+
+
+
+
 def test(model, device, test_loader):
     model.eval()
     test_loss = 0
-    correct = 0
-
-    # we aren't using `TripletLoss` as the MNIST dataset is simple, so `BCELoss` can do the trick.
-    criterion = nn.BCEWithLogitsLoss()
-    # para graficar perdia en entrenamiento y accuracy
+    
+    criterion = nn.MSELoss()
     loss_test_list = []
-    accuracy_list = []
+
+    all_targets = []
+    all_outputs = []
 
     with torch.no_grad():
         for (images_1, images_2, targets) in test_loader:
             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
             outputs = model(images_1, images_2).squeeze()
-            test_loss += criterion(outputs, targets).sum().item()  # sum up batch loss
-            pred = torch.where(outputs > 0.5, 1, 0)  # get the index of the max log-probability
-            correct += pred.eq(targets.view_as(pred)).sum().item()
+            test_loss += criterion(outputs, targets).sum().item()  
+            
+            all_targets.extend(targets.cpu().numpy())
+            all_outputs.extend(outputs.cpu().numpy())
 
     test_loss /= len(test_loader.dataset)
-
     loss_test_list.append(test_loss)
-    accuracy_list.append(100. * correct / len(test_loader.dataset))
 
-    # for the 1st epoch, the average loss is 0.0001 and the accuracy 97-98%
-    # using default settings. After completing the 10th epoch, the average
-    # loss is 0.0000 and the accuracy 99.5-100% using default settings.
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    all_targets = np.array(all_targets)
+    all_outputs = np.array(all_outputs)
+
+    mae = mean_absolute_error(all_targets, all_outputs)
+    mse = mean_squared_error(all_targets, all_outputs)
+    rmse = np.sqrt(mse)
+    #r2 = r2_score(all_targets, all_outputs)
+
+    print(f'\nTest set: Average loss: {test_loss:.4f}')
+    print(f'MAE: {mae:.4f}, MSE: {mse:.4f}, RMSE: {rmse:.4f}\n') # , R^2: {r2:.4f}
 
     loss_test_list = np.mean(loss_test_list)
 
-    return loss_test_list, accuracy_list
+    return loss_test_list, mae, mse, rmse #, r2
+
+
+#################################
+# PARA MOSTRAR IMÁGENES
+#################################
 
 def testShow(model, device, test_loader):
     model.eval()
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = nn.MSELoss()
     with torch.no_grad():
         for i, data in enumerate(test_loader,0): 
             images_1, images_2, targets = data
@@ -148,7 +184,7 @@ def testShow(model, device, test_loader):
             #plt.imshow(torchvision.utils.make_grid(concat)[0], cmap="grey")
             #plt.colorbar
             #plt.show()
-            imshow(images_1,images_2,f"Distancia : {test_loss.item()}")
-            print(f"Distancia : {test_loss.item()}")
+            imshow(images_1,images_2,f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+            print(f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
             if i == 9:
                 break
