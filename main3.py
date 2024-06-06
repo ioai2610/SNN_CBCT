@@ -10,8 +10,8 @@ from DicomDataset import DicomDataset
 import numpy as np
 
 # definimos las rutas
-train_csv_path = "./Train_Irving_Final.csv"
-test_csv_path = "./Test_Irving_Final.csv"
+train_csv_path = "./Train_Irving_Final_Version2.csv"
+test_csv_path = "./Test_Irving_Final_Version2.csv"
 # train_csv_path = "./training_data.csv"
 # test_csv_path = "./test_data.csv"
 root = "./"
@@ -20,26 +20,35 @@ root = "./"
 def main():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch Siamese network Example')
-    parser.add_argument('--batch-size', type=int, default=32, metavar='N',
-                        help='input batch size for training (default: 64)') # tamaño del batch de entrenamiento, default = 64
-    parser.add_argument('--test-batch-size', type=int, default=32, metavar='N',
-                        help='input batch size for testing (default: 1000)') # tamaño del batch de test, default = 64
+    # tamaño del batch de entrenamiento, default = 64
+    parser.add_argument('--batch-size', type=int, default=16, metavar='N',
+                        help='input batch size for training (default: 64)') 
+    # tamaño del batch de test, default = 64
+    parser.add_argument('--test-batch-size', type=int, default=16, metavar='N',
+                        help='input batch size for testing (default: 1000)') 
+    # cantidad de epochs, default = 6
     parser.add_argument('--epochs', type=int, default=10, metavar='N',
-                        help='number of epochs to train (default: 14)') # cantidad de epochs, default = 6
-    parser.add_argument('--lr', type=float, default=1.0, metavar='LR',
-                        help='learning rate (default: 1.0)') # parametro de aprendizaje, default = 1.0
-    parser.add_argument('--gamma', type=float, default=1.0, metavar='M',
-                        help='Learning rate step gamma (default: 0.7)') # pasos del parametro de aprendizaje, default = 0.7
+                        help='number of epochs to train (default: 14)') 
+    # parametro de aprendizaje, default = 1.0
+    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+                        help='learning rate (default: 1.0)') 
+    # pasos del parametro de aprendizaje, default = 0.7
+    parser.add_argument('--gamma', type=float, default=0.01, metavar='M',
+                        help='Learning rate step gamma (default: 0.7)') 
+    # por si se desea no usar CUDA
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
+    # para GPU de macOS
     parser.add_argument('--no-mps', action='store_true', default=False,
                         help='disables macOS GPU training')
     parser.add_argument('--dry-run', action='store_true', default=False,
                         help='quickly check a single pass')
+    # semilla para resultados reproducibles
     parser.add_argument('--seed', type=int, default=1, metavar='S',
-                        help='random seed (default: 1)')
+                        help='random seed (default: 1)') 
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
+    # guardar modelo
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
     args = parser.parse_args() # lectura de argumentos
@@ -50,12 +59,14 @@ def main():
 
     torch.manual_seed(args.seed) # definición de semilla para reproducibilidad 
 
-    if use_cuda: # usar CUDA si se encuuentra disponible, de otro modo se usa MPS o el CPU
-        device = torch.device("cuda")
-    elif use_mps:
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
+    # if use_cuda: # usar CUDA si se encuuentra disponible, de otro modo se usa MPS o el CPU
+    #     device = torch.device("cuda")
+    # elif use_mps:
+    #     device = torch.device("mps")
+    # else:
+    #     device = torch.device("cpu")
+
+    device = torch.device("cuda")
 
     train_kwargs = {'batch_size': args.batch_size} # argumentos del entrenamiento
     test_kwargs = {'batch_size': args.test_batch_size} # argumentos del test
@@ -67,8 +78,8 @@ def main():
         train_kwargs.update(cuda_kwargs)
         test_kwargs.update(cuda_kwargs)
 
-    train_dataset = DicomDataset(root, train_csv_path, transforms.Compose([transforms.Resize(105,antialias=True)]))
-    test_dataset = DicomDataset(root, test_csv_path, transforms.Compose([transforms.Resize(255, antialias=True)]))
+    train_dataset = DicomDataset(root, train_csv_path) # , transforms.Compose([transforms.Resize(105,antialias=True)])
+    test_dataset = DicomDataset(root, test_csv_path) # , transforms.Compose([transforms.Resize(255, antialias=True)])
     train_loader = torch.utils.data.DataLoader(train_dataset,**train_kwargs)
     test_loader = torch.utils.data.DataLoader(test_dataset, **test_kwargs)
 

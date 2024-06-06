@@ -29,13 +29,13 @@ class DicomDataset(Dataset):
         image_file_1 = pydicom.dcmread(os.path.join(self.root, self.df.iat[index, 0])) 
         image_file_2 = pydicom.dcmread(os.path.join(self.root, self.df.iat[index, 1]))
         # convertir a arreglo numpy con instrucción pixel_array para leer archivos DICOM y añadimos una dimension
-        image_1 = np.array(image_file_1.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension
-        image_2 = np.array(image_file_2.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension
+        image_1 = np.array(image_file_1.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension | debe ser float32 para poder operar en tensor
+        image_2 = np.array(image_file_2.pixel_array, dtype=np.float32)[np.newaxis]  # Add channel dimension | debe ser float32 para poder operar en tensor
         # pasamos de numpy a un tensor en torch
         image_1 = torch.from_numpy(image_1)
         image_2 = torch.from_numpy(image_2)
         # hacemos lo mismo para el objetivo (puntuacion)
-        target = torch.from_numpy(np.array(self.df.iat[index, 2], dtype=np.float32))
+        target = torch.from_numpy(np.array(self.df.iat[index, 2], dtype=np.float32)) # | debe ser float32 para poder operar en tensor
         # si se define una transformación, esta se aplica
         if self.transform:
             image_1 = self.transform(image_1)
