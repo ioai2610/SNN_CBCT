@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--test-batch-size', type=int, default=16, metavar='N',
                         help='input batch size for testing (default: 1000)') 
     # cantidad de epochs, default = 6
-    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+    parser.add_argument('--epochs', type=int, default=2, metavar='N',
                         help='number of epochs to train (default: 14)') 
     # parametro de aprendizaje, default = 1.0
     parser.add_argument('--lr', type=float, default=0.01, metavar='LR',

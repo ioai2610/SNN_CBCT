@@ -70,56 +70,41 @@ accuracies = [95, 96, 97, 97.5, 98]
 # Llama a la función para graficar
 #plot_loss_and_accuracy_in_one(train_losses, test_losses, accuracies)
 
-def imshow(img_01,img_02, text=None, should_save=False):
-    # npimg_1 = img_01.cpu()
-    # npimg_1 = npimg_1.numpy()
-    # npimg_2 = img_02.cpu()
-    # npimg_2 = npimg_2.numpy()
-    # if text:
-    #     plt.text(
-    #         75,
-    #         8,
-    #         text,
-    #         style="italic",
-    #         fontweight="bold",
-    #         bbox={"facecolor": "black", "alpha": 0.8, "pad": 10},
-    #     )
-    # plt.subplot(1,2,1)
-    # plt.axis("off")
-    # plt.imshow(np.transpose(npimg_1[1],(1,2,0)), cmap='gray') 
-    # plt.subplot(1,2,2)
-    # plt.axis("off")
-    # plt.imshow(np.transpose(npimg_2[1],(1,2,0)), cmap='gray') # np.transpose(npimg, (2, 3, 1, 0))
-    # plt.show()
+# def imshow(img_01,img_02, text=None, should_save=False):
+#     npimg_1 = img_01.cpu().numpy()
+#     npimg_2 = img_02.cpu().numpy()
+#     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+#     fig.suptitle(text)
+#     # Configurar ejes y mostrar imágenes
+#     ax1.axis("off")
+#     ax2.axis("off")
+#     ax1.imshow(np.transpose(npimg_1[1], (1, 2, 0)), cmap='gray')
+#     ax2.imshow(np.transpose(npimg_2[1], (1, 2, 0)), cmap='gray')
+
+#     # Agregar la barra de color
+#     cax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
+#     sm = plt.cm.ScalarMappable(cmap='gray')
+#     sm.set_array([])
+#     fig.colorbar(sm, cax=cax)
+
+#     plt.show()
+
+def imshow(img_01, img_02, text=None, should_save=False):
     npimg_1 = img_01.cpu().numpy()
     npimg_2 = img_02.cpu().numpy()
     
-    # if text:
-    #     plt.text(
-    #         0.5,  # Posición x del texto (centro)
-    #         0.01,  # Posición y del texto (cerca del borde inferior)
-    #         text,
-    #         style="italic",
-    #         fontweight="bold",
-    #         bbox={"facecolor": "white", "alpha": 0.8, "pad": 5},
-    #         transform=plt.gcf().transFigure,  # Transformación para las coordenadas de la figura
-    #         horizontalalignment='center',  # Alineación horizontal al centro
-    #     )
-
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
     fig.suptitle(text)
     # Configurar ejes y mostrar imágenes
     ax1.axis("off")
     ax2.axis("off")
-    ax1.imshow(np.transpose(npimg_1[1], (1, 2, 0)), cmap='gray')
-    ax2.imshow(np.transpose(npimg_2[1], (1, 2, 0)), cmap='gray')
+    ax1.imshow(np.transpose(npimg_1[0], (1, 2, 0)), cmap='gray')
+    ax2.imshow(np.transpose(npimg_2[0], (1, 2, 0)), cmap='gray')
 
     # Agregar la barra de color
-    cax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  # [left, bottom, width, height]
-    #norm = plt.Normalize(vmin=0, vmax=11)
+    cax = fig.add_axes([0.92, 0.15, 0.02, 0.7])  
     sm = plt.cm.ScalarMappable(cmap='gray')
     sm.set_array([])
     fig.colorbar(sm, cax=cax)
 
     plt.show()
-

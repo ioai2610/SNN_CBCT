@@ -25,6 +25,8 @@ class DicomDataset(Dataset):
         return self.df.shape[0] # longitud del archivo csv
 
     def __getitem__(self, index):
+        image_path_1 = self.df.iat[index, 0]
+        image_path_2 = self.df.iat[index, 1]
         # lectura de los primeros dos archivos (columna 1 y columna 2)
         image_file_1 = pydicom.dcmread(os.path.join(self.root, self.df.iat[index, 0])) 
         image_file_2 = pydicom.dcmread(os.path.join(self.root, self.df.iat[index, 1]))
@@ -42,7 +44,7 @@ class DicomDataset(Dataset):
             image_2 = self.transform(image_2)
 
         # obtenemos ambas imagenes y su puntuacion
-        return (image_1, image_2, target)
+        return (image_1, image_2, target, image_path_1, image_path_2)
         # try:
         #     # Lectura de los primeros dos archivos (columna 1 y columna 2)
         #     image_file_1 = pydicom.dcmread(os.path.join(self.root, self.df.iat[index, 0])) 

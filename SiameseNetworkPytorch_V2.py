@@ -75,7 +75,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
     # para graficar pérdida
     loss_train_list = []
 
-    for batch_idx, (images_1, images_2, targets) in enumerate(train_loader):
+    for batch_idx, (images_1, images_2, targets, image_path_1, image_path_2) in enumerate(train_loader):
         images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(images_1, images_2).squeeze()
@@ -140,7 +140,7 @@ def test(model, device, test_loader):
     all_outputs = []
 
     with torch.no_grad():
-        for (images_1, images_2, targets) in test_loader:
+        for (images_1, images_2, targets, image_path_1, image_path_2) in test_loader:
             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
             outputs = model(images_1, images_2).squeeze()
             test_loss += criterion(outputs, targets).sum().item()  
@@ -171,20 +171,126 @@ def test(model, device, test_loader):
 # PARA MOSTRAR IMÁGENES
 #################################
 
+# def testShow(model, device, test_loader):
+#     model.eval()
+#     criterion = nn.MSELoss()
+#     with torch.no_grad():
+#         for i, data in enumerate(test_loader,0): 
+#             images_1, images_2, targets = data
+#             #concat = torch.cat((images_1, images_2),0)
+#             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
+#             outputs = model(images_1, images_2).squeeze()
+#             test_loss = criterion(outputs, targets) # sum up batch loss
+#             #plt.imshow(torchvision.utils.make_grid(concat)[0], cmap="grey")
+#             #plt.colorbar
+#             #plt.show()
+#             imshow(images_1,images_2,f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+#             print(f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+#             if i == 9:
+#                 break
+
+# def testShow(model, device, test_loader):
+#     model.eval()
+#     criterion = nn.MSELoss()
+#     with torch.no_grad():
+#         for i, data in enumerate(test_loader, 0): 
+#             images_1, images_2, targets, image_path_1, image_path_2 = data
+#             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
+#             outputs = model(images_1, images_2).squeeze()
+
+#             # Calcula la pérdida
+#             test_loss = criterion(outputs, targets)  # Pérdida para el batch actual
+            
+#             # Muestra las imágenes y la métrica de similitud
+#             imshow(images_1, images_2, f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+#             print(f"Archivos: {image_path_1[0]} y {image_path_2[0]}")
+            
+#             # Imprime los valores reales y predichos
+#             print(f"Valor real: {targets.item()}, Valor predicho: {outputs.item()}")
+#             print(f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+            
+#             if i == 9:
+#                 break
+
+# def testShow(model, device, test_loader):
+#     model.eval()
+#     criterion = nn.MSELoss()
+#     image_1_list = []
+#     image_2_list = []
+#     with torch.no_grad():
+#         for i, data in enumerate(test_loader, 0): 
+#             images_1, images_2, targets, image_path_1, image_path_2  = data
+#             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
+#             outputs = model(images_1, images_2).squeeze()
+#             # Calcula la pérdida
+#             test_loss = criterion(outputs, targets)  # Pérdida para el batch actual
+#             # Extraer la parte relevante de los nombres de archivos
+#             relevant_path_1 = image_path_1[0].split('Train_V2_DICOM\\')[-1]
+#             relevant_path_2 = image_path_2[0].split('Train_V2_DICOM\\')[-1]
+
+#             print(f"Archivos: {relevant_path_1} y {relevant_path_2}")
+#             image_1_list.append(images_1)
+#             image_2_list.append(images_2)
+#             # Imprime los valores reales y predichos
+#         for image1,image2,target, output in zip(image_1_list,image_2_list,targets, outputs):
+#             real_value = f"{target.item():.2f}"
+#             predicted_value = f"{output.item():.2f}"
+#             imshow(
+#                 image1, 
+#                 image2, 
+#                 f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {relevant_path_1} y {relevant_path_2}"
+#             )
+#             # Mostrar las primeras 10 imágenes comparadas
+#             # if i < 10:
+#             #     imshow(images_1, images_2, f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+            
+#             # Detener después de 10 iteraciones
+#             if i == 9:
+#                 break
+#         print(f"La pérdida del test es: {test_loss}")
+
 def testShow(model, device, test_loader):
     model.eval()
     criterion = nn.MSELoss()
+    image_1_list = []
+    image_2_list = []
+    target_list = []
+    output_list = []
+    path_list_1 = []
+    path_list_2 = []
+    
     with torch.no_grad():
-        for i, data in enumerate(test_loader,0): 
-            images_1, images_2, targets = data
-            #concat = torch.cat((images_1, images_2),0)
+        for i, data in enumerate(test_loader, 0): 
+            images_1, images_2, targets, image_path_1, image_path_2 = data
             images_1, images_2, targets = images_1.to(device), images_2.to(device), targets.to(device)
             outputs = model(images_1, images_2).squeeze()
-            test_loss = criterion(outputs, targets) # sum up batch loss
-            #plt.imshow(torchvision.utils.make_grid(concat)[0], cmap="grey")
-            #plt.colorbar
-            #plt.show()
-            imshow(images_1,images_2,f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
-            print(f"Métrica (0 - Diferente | 1 - Similares) : {test_loss.item()}")
+            # Calcula la pérdida
+            test_loss = criterion(outputs, targets)  # Pérdida para el batch actual
+            # Extraer la parte relevante de los nombres de archivos
+            relevant_path_1 = [path.split('Train_V2_DICOM\\')[-1] for path in image_path_1]
+            relevant_path_2 = [path.split('Train_V2_DICOM\\')[-1] for path in image_path_2]
+
+            print(f"Archivos: {relevant_path_1[0]} y {relevant_path_2[0]}")
+            image_1_list.extend(images_1.cpu())
+            image_2_list.extend(images_2.cpu())
+            target_list.extend(targets.cpu())
+            output_list.extend(outputs.cpu())
+            path_list_1.extend(relevant_path_1)
+            path_list_2.extend(relevant_path_2)
+            
+            # Mostrar las primeras 10 imágenes comparadas
             if i == 9:
                 break
+
+    # Imprime los valores reales y predichos
+    for img1, img2, target, output, path_1, path_2 in zip(image_1_list, image_2_list, target_list, output_list, path_list_1, path_list_2):
+        real_value = f"{target.item():.2f}"
+        predicted_value = f"{output.item():.2f}"
+        print(f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {path_1} y {path_2}")
+        imshow(
+            img1.unsqueeze(0),  # Adding channel dimension back
+            img2.unsqueeze(0),  # Adding channel dimension back
+            f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {path_1} y {path_2}"
+        )
+
+    print(f"La pérdida del test es: {test_loss.item()}")
