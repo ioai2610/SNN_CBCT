@@ -12,22 +12,22 @@ def plot_loss_and_metrics(train_loss, test_loss, mae, mse, rmse, epochs): # r2,
     plt.plot(epochs_range, train_loss, label='Train Loss')
     plt.plot(epochs_range, test_loss, label='Test Loss')
     plt.legend(loc='upper right')
-    plt.title('Loss')
+    plt.title('Pérdida')
 
     plt.subplot(2, 3, 2)
     plt.plot(epochs_range, mae, label='MAE')
     plt.legend(loc='upper right')
-    plt.title('Mean Absolute Error')
+    plt.title('Error absoluto medio')
 
     plt.subplot(2, 3, 3)
     plt.plot(epochs_range, mse, label='MSE')
     plt.legend(loc='upper right')
-    plt.title('Mean Squared Error')
+    plt.title('Error cuadrático medio')
 
     plt.subplot(2, 3, 4)
     plt.plot(epochs_range, rmse, label='RMSE')
     plt.legend(loc='upper right')
-    plt.title('Root Mean Squared Error')
+    plt.title('Raíz de error cuadrático medio')
 
     # plt.subplot(2, 3, 5)
     # plt.plot(epochs_range, r2, label='R^2')
