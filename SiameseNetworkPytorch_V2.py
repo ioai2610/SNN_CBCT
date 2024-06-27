@@ -6,6 +6,7 @@ from utils import imshow
 import matplotlib.pyplot as plt
 import torchvision
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import csv
 
 #################################
 # DEFINICIÓN DE LA RED
@@ -270,7 +271,7 @@ def testShow(model, device, test_loader):
             relevant_path_1 = [path.split('Train_V2_DICOM\\')[-1] for path in image_path_1]
             relevant_path_2 = [path.split('Train_V2_DICOM\\')[-1] for path in image_path_2]
 
-            print(f"Archivos: {relevant_path_1[0]} y {relevant_path_2[0]}")
+            # print(f"Archivos: {relevant_path_1[0]} y {relevant_path_2[0]}")
             image_1_list.extend(images_1.cpu())
             image_2_list.extend(images_2.cpu())
             target_list.extend(targets.cpu())
@@ -281,16 +282,28 @@ def testShow(model, device, test_loader):
             # Mostrar las primeras 10 imágenes comparadas
             if i == 9:
                 break
+            
+    # Guardar los valores en un archivo .csv
+    headers = ['ID', 'Archivo1', 'Archivo2', 'ValorReal', 'ValorPredicho']
+    with open('resultados.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)
+        for idx, (target, output, path_1, path_2) in enumerate(zip(target_list, output_list, path_list_1, path_list_2)):
+            real_value = f"{target.item():.2f}"
+            predicted_value = f"{output.item():.2f}"
+            writer.writerow([idx + 1, path_1, path_2, real_value, predicted_value])
+
+    print("Valores guardados en resultados.csv")
 
     # Imprime los valores reales y predichos
     for img1, img2, target, output, path_1, path_2 in zip(image_1_list, image_2_list, target_list, output_list, path_list_1, path_list_2):
         real_value = f"{target.item():.2f}"
         predicted_value = f"{output.item():.2f}"
         print(f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {path_1} y {path_2}")
-        imshow(
-            img1.unsqueeze(0),  # Adding channel dimension back
-            img2.unsqueeze(0),  # Adding channel dimension back
-            f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {path_1} y {path_2}"
-        )
+        # imshow(
+        #     img1.unsqueeze(0),  # Adding channel dimension back
+        #     img2.unsqueeze(0),  # Adding channel dimension back
+        #     f"Valor real: {real_value}, Valor predicho: {predicted_value}\nArchivos: {path_1} y {path_2}"
+        # )
 
     print(f"La pérdida del test es: {test_loss.item()}")
